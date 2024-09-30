@@ -99,7 +99,13 @@ public class TruststoreBuilder {
         for (String file : truststores) {
             File f = new File(file);
             if (f.isDirectory()) {
-                mergeFiles(Stream.of(f.listFiles()).map(File::getAbsolutePath).toArray(String[]::new), truststore, false, discoveredFiles);
+                File[] files = f.listFiles();
+                if (files != null) {
+                    mergeFiles(Stream.of(files).map(File::getAbsolutePath).toArray(String[]::new), truststore, false, discoveredFiles);
+                } else {
+                    LOGGER.warnf("Directory contents can't be listed, it will be skipped, probably not enough permissions for path %s",
+                            f.getAbsolutePath());
+                }
             } else {
                 if (file.endsWith(".p12") || file.endsWith(".pfx")) {
                     mergeTrustStore(truststore, file, loadStore(file, PKCS12, null));
